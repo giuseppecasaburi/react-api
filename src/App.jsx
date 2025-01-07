@@ -1,22 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import articleArray from "./data/articleArray";
+import axios from "axios";
+
 
 const initialFormData = {
+  id: "",
   title: "",
   content: "",
-  category: "General",
   image: "",
-  isPublished: false,
-  email: "",
+  tags: ""
 };
 
 function App() {
-  const [posts, setPosts] = useState(articleArray); // Usa articleArray come stato iniziale
+  const [posts, setPosts] = useState([]); // Usa postsArray come stato iniziale
   const [formData, setFormData] = useState(initialFormData);
   const [submitted, setSubmitted] = useState(false); // Stato per tracciare se il form è stato inviato
-  const [availableMessage, setAvailableMessage] = useState("");
-  const [emailMessage, setEmailMessage] = useState("");
+
+  useEffect(() => {
+    getPosts()
+  }, [])
+
+  const getPosts = () => {
+    axios.get("http://localhost:3000/posts").then((resp) => {
+      console.log(resp.data.data);
+      setPosts(resp.data.data)
+    })
+  }
 
   // Funzione per gestire l'invio del form
   const handlePostForm = (event) => {
@@ -31,19 +40,6 @@ function App() {
 
     // Reset del form
     setFormData(initialFormData);
-
-    // Messaggi di validazione
-    if (!formData.isPublished) {
-      setAvailableMessage("Post non pubblicato");
-    } else {
-      setAvailableMessage("Post pubblicato!");
-    }
-
-    if (!formData.email) {
-      setEmailMessage("Email mancante");
-    } else {
-      setEmailMessage("");
-    }
   };
 
   // Funzione per gestire la cancellazione dei post
@@ -67,124 +63,73 @@ function App() {
 
   return (
     <div className="container">
-    <section>
-      <h3>Aggiungi un nuovo post</h3>
-      <form onSubmit={handlePostForm}>
-        <div className="mb-3">
-          <label htmlFor="title">Titolo del post</label>
-          <input
-            type="text"
-            className="form-control"
-            name="title"
-            id="title"
-            value={formData.title}
-            onChange={handleInputChange}
-          />
-        </div>
+      <section>
+        <h3>Aggiungi un nuovo post</h3>
+        <form onSubmit={handlePostForm}>
+          <div className="mb-3">
+            <label htmlFor="title">Titolo del post</label>
+            <input
+              type="text"
+              className="form-control"
+              name="title"
+              id="title"
+              value={formData.title}
+              onChange={handleInputChange}
+            />
+          </div>
 
-        <div className="mb-3">
-          <label htmlFor="content">Contenuto del post</label>
-          <textarea
-            name="content"
-            id="content"
-            className="form-control"
-            value={formData.content}
-            onChange={handleInputChange}
-          ></textarea>
-        </div>
+          <div className="mb-3">
+            <label htmlFor="content">Contenuto del post</label>
+            <textarea
+              name="content"
+              id="content"
+              className="form-control"
+              value={formData.content}
+              onChange={handleInputChange}
+            ></textarea>
+          </div>
 
-        <div className="mb-3">
-          <label htmlFor="image">Immagine</label>
-          <input
-            type="file"
-            className="form-control"
-            name="image"
-            id="image"
-            onChange={handleInputChange}
-          />
-        </div>
+          <div className="mb-3">
+            <label htmlFor="image">Immagine</label>
+            <input
+              type="file"
+              className="form-control"
+              name="image"
+              id="image"
+              onChange={handleInputChange}
+            />
+          </div>
 
-        <div className="mb-3">
-          <label htmlFor="email">Email di contatto</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            className="form-control"
-          />
-          <p>{emailMessage}</p>
-        </div>
+          <button type="submit" className="btn btn-primary">
+            Salva
+          </button>
+        </form>
+      </section>
 
-        <div className="mb-3">
-          <label htmlFor="category">Categoria</label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleInputChange}
-            className="form-control"
-          >
-            <option value="General">Generale</option>
-            <option value="Technology">Tecnologia</option>
-            <option value="Lifestyle">Lifestyle</option>
-          </select>
-        </div>
-
-        <div className="my-3">
-          <label htmlFor="isPublished">Pubblica il post</label>
-          <input
-            id="isPublished"
-            type="checkbox"
-            name="isPublished"
-            checked={formData.isPublished}
-            onChange={handleInputChange}
-          />
-          <div>{availableMessage}</div>
-        </div>
-
-        <button type="submit" className="btn btn-primary">
-          Salva
-        </button>
-      </form>
-    </section>
       <section>
         <h2>I nostri post</h2>
-        {submitted ? (
-          posts.length > 0 ? (
-            <div className="row row-cols-2 row-cols-lg-3">
-              {posts.map((curPost) => (
-                <div className="col" key={curPost.id}>
-                  <div className="card">
-                    <div className="card-body">
-                      <h4>{curPost.title}</h4>
-                      <p>{curPost.content}</p>
-                      <p>Categoria: {curPost.category}</p>
-                      {curPost.image && (
-                        <img
-                          src={URL.createObjectURL(curPost.image)}
-                          alt="Post"
-                        />
-                      )}
-                      <p>{curPost.isPublished ? "Pubblicato" : "Non pubblicato"}</p>
-                      <button
-                        onClick={() => deletePost(curPost.id)}
-                        className="btn btn-danger"
-                      >
-                        Cancella
-                      </button>
-                    </div>
-                  </div>
+
+        <div className="row row-cols-2 row-cols-lg-3">
+          {posts.map((curPost) => (
+            <div className="col" key={curPost.id}>
+              <div className="card">
+                <div className="card-body">
+                  <h4>{curPost.title}</h4>
+                  <p>{curPost.content}</p>
+                  <p>Categoria: {curPost.category}</p>
+                  <button
+                    onClick={() => deletePost(curPost.id)}
+                    className="btn btn-danger"
+                  >
+                    Cancella
+                  </button>
                 </div>
-                ))}
               </div>
-            ) : (
-              <p>Nessun post disponibile</p>
-            )
-          ) : (
-          <p>Nessun post disponibile</p>
-        )}
+            </div>
+          ))}
+        </div>
+
+
       </section>
 
     </div>
