@@ -1,0 +1,20 @@
+.container {
+  width: 70%;
+  margin: 100px auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.submit-area {
+  margin: 10px 0;
+}
+
+.space {
+  margin: 0 5px;
+}
+
+.space-up-down {
+  padding: 5px 0;
+}
