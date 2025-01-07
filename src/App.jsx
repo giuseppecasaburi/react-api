@@ -11,6 +11,8 @@ const initialFormData = {
   tags: ""
 };
 
+const apiUrl = "http://localhost:3000";
+
 function App() {
   const [posts, setPosts] = useState([]); // Usa postsArray come stato iniziale
   const [formData, setFormData] = useState(initialFormData);
@@ -21,7 +23,7 @@ function App() {
   }, [])
 
   const getPosts = () => {
-    axios.get("http://localhost:3000/posts").then((resp) => {
+    axios.get(`${apiUrl}/posts`).then((resp) => {
       console.log(resp.data.data);
       setPosts(resp.data.data)
     })
@@ -31,22 +33,26 @@ function App() {
   const handlePostForm = (event) => {
     event.preventDefault();
 
-    // Crea il nuovo post e aggiungilo all'array dei post
-    const newPost = { ...formData, id: Date.now() };
-    setPosts((prevPosts) => [...prevPosts, newPost]);
+    axios.post(`${apiUrl}/posts`, formData).then((resp) => {
+      console.log(resp);
 
-    // Imposta lo stato di submitted a true per mostrare i post
-    setSubmitted(true);
+      const newArray = [...posts, resp.data]; // Creo un nuovo array dove unisco il vecchio al nuovo elemento
 
-    // Reset del form
-    setFormData(initialFormData);
+      setPosts(newArray); // Aggiorno l'array iniziale
+
+      setFormData(initialFormData);// Reset del form
+    })
+
   };
 
   // Funzione per gestire la cancellazione dei post
-  const deletePost = (id) => {
-    const updatedPosts = posts.filter((post) => post.id !== id);
-    setPosts(updatedPosts);
-  };
+  const deletePost = (id) => {                                  // CHIEDERE DA DOVE VIENE PRESO ID //
+    axios.delete(`${apiUrl}/posts/${id}`).then((resp) => {
+      console.log(resp);
+      const updatedPosts = posts.filter((post) => post.id !== id);
+      setPosts(updatedPosts);
+    })
+  }
 
   // Gestisce il cambio dei valori degli input
   const handleInputChange = (event) => {
@@ -115,6 +121,7 @@ function App() {
               <div className="card">
                 <div className="card-body">
                   <h4>{curPost.title}</h4>
+                  <img src={`${apiUrl}/${curPost.image}`} alt="" />
                   <p>{curPost.content}</p>
                   <p>Categoria: {curPost.category}</p>
                   <button
@@ -128,10 +135,7 @@ function App() {
             </div>
           ))}
         </div>
-
-
       </section>
-
     </div>
   );
 }
