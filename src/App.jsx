@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from "axios";
+import Card from "./components/Card";
 
 
 const initialFormData = {
-  id: "",
   title: "",
   content: "",
   image: "",
@@ -46,7 +46,7 @@ function App() {
   };
 
   // Funzione per gestire la cancellazione dei post
-  const deletePost = (id) => {                                  // CHIEDERE DA DOVE VIENE PRESO ID //
+  const deletePost = (id) => {                                  // CHIEDERE ID //
     axios.delete(`${apiUrl}/posts/${id}`).then((resp) => {
       console.log(resp);
       const updatedPosts = posts.filter((post) => post.id !== id);
@@ -118,20 +118,7 @@ function App() {
         <div className="row row-cols-2 row-cols-lg-3">
           {posts.map((curPost) => (
             <div className="col" key={curPost.id}>
-              <div className="card">
-                <div className="card-body">
-                  <h4>{curPost.title}</h4>
-                  <img src={`${apiUrl}/${curPost.image}`} alt="" />
-                  <p>{curPost.content}</p>
-                  <p>Categoria: {curPost.category}</p>
-                  <button
-                    onClick={() => deletePost(curPost.id)}
-                    className="btn btn-danger"
-                  >
-                    Cancella
-                  </button>
-                </div>
-              </div>
+              <Card curPost={curPost} apiUrl={apiUrl} deletePost={deletePost} />
             </div>
           ))}
         </div>
